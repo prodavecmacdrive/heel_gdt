@@ -1,0 +1,13 @@
+[gd_scene format=3 uid="uid://crersi0s32p6x"]
+
+[ext_resource type="Script" uid="uid://ddc8tlsdxuajh" path="res://addons/bunker_master/bunker_master.gd" id="1_master"]
+[ext_resource type="PackedScene" uid="uid://b8bx5kkki7lgu" path="res://rooms/room_01.tscn" id="2_room1"]
+[ext_resource type="PackedScene" uid="uid://57lh70kj8dx2" path="res://rooms/room_02.tscn" id="3_room2"]
+
+[node name="BunkerMaster" type="Node3D" unique_id=1842919342]
+script = ExtResource("1_master")
+
+[node name="Room01" parent="." unique_id=2061058073 instance=ExtResource("2_room1")]
+
+[node name="Room02" parent="." unique_id=1302322259 instance=ExtResource("3_room2")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 30, 0, 0)

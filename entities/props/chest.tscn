@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://bouqv15jm7l0d"]
+
+[ext_resource type="Script" uid="uid://buei2uvnf3rt" path="res://entities/props/chest.gd" id="1_twpm2"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_otv7a"]
+albedo_color = Color(0.29093066, 0, 0, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_d3ul5"]
+material = SubResource("StandardMaterial3D_otv7a")
+size = Vector3(1.2, 0.8, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_d3ul5"]
+size = Vector3(1.2, 0.8, 1)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_otv7a"]
+size = Vector3(1.6, 1, 1.4)
+
+[node name="Chest" type="StaticBody3D" unique_id=267795547]
+script = ExtResource("1_twpm2")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1055037782]
+mesh = SubResource("BoxMesh_d3ul5")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1092008131]
+shape = SubResource("BoxShape3D_d3ul5")
+
+[node name="InteractArea" type="Area3D" parent="." unique_id=94745409]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="InteractArea" unique_id=1244430356]
+shape = SubResource("BoxShape3D_otv7a")

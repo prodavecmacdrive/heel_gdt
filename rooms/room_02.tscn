@@ -1,0 +1,78 @@
+[gd_scene format=3 uid="uid://57lh70kj8dx2"]
+
+[ext_resource type="Script" uid="uid://ba32dlb06gkim" path="res://core/room_base.gd" id="1_glsqi"]
+[ext_resource type="Script" uid="uid://b836h5cd1chnh" path="res://rooms/terrain.gd" id="2_k8g7n"]
+[ext_resource type="PackedScene" uid="uid://bouqv15jm7l0d" path="res://entities/props/chest.tscn" id="3_qdg5o"]
+[ext_resource type="PackedScene" uid="uid://bx8q8njxbeiv3" path="res://entities/door/door.tscn" id="4_0is50"]
+[ext_resource type="Script" uid="uid://cu7jka60nwsvw" path="res://entities/player/player.gd" id="5_nmnel"]
+
+[sub_resource type="NavigationMesh" id="NavigationMesh_d3ul5"]
+agent_height = 1.2
+agent_max_slope = 60.0
+
+[sub_resource type="HeightMapShape3D" id="HeightMapShape3D_d3ul5"]
+map_width = 33
+map_depth = 33
+map_data = PackedFloat32Array(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_v321d"]
+size = Vector2(32, 32)
+subdivide_width = 32
+subdivide_depth = 32
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_d3ul5"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_d3ul5"]
+
+[node name="Room" type="Node3D" unique_id=772767533]
+script = ExtResource("1_glsqi")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1609117543]
+transform = Transform3D(0.8660254, 0.35355338, -0.35355338, 0, 0.70710677, 0.70710677, 0.5, -0.6123724, 0.6123724, 0, 0, 0)
+light_color = Color(0, 0.45882353, 0.78431374, 1)
+light_energy = 0.7
+shadow_enabled = true
+
+[node name="Camera3D" type="Camera3D" parent="." unique_id=1868199601]
+transform = Transform3D(-0.68520004, -0.5331077, 0.4962833, -0.034295507, 0.70423454, 0.70913863, -0.72754705, 0.4688815, -0.50082475, 8.175869, 5.5326033, -9.399536)
+
+[node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=368923970]
+navigation_mesh = SubResource("NavigationMesh_d3ul5")
+
+[node name="Terrain" type="StaticBody3D" parent="NavigationRegion3D" unique_id=310378124]
+script = ExtResource("2_k8g7n")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/Terrain" unique_id=1808614351]
+shape = SubResource("HeightMapShape3D_d3ul5")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="NavigationRegion3D/Terrain" unique_id=1987716841]
+mesh = SubResource("PlaneMesh_v321d")
+
+[node name="Chest" parent="NavigationRegion3D" unique_id=267795547 instance=ExtResource("3_qdg5o")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 1.5, 1)
+chest_id = "room_02_chest"
+is_locked = false
+unlock_items = Array[String]([])
+items = Array[String](["Отвертка", "Карточка"])
+
+[node name="Door" parent="NavigationRegion3D" unique_id=592288972 instance=ExtResource("4_0is50")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3, 1.5, -3)
+door_id = "door_02"
+target_scene = "uid://b8bx5kkki7lgu"
+target_door_id = "door_01"
+
+[node name="Player" type="CharacterBody3D" parent="." unique_id=922009291]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
+up_direction = Vector3(0, -1, 0)
+script = ExtResource("5_nmnel")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Player" unique_id=1809557070]
+mesh = SubResource("CapsuleMesh_d3ul5")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player" unique_id=1123847474]
+shape = SubResource("CapsuleShape3D_d3ul5")
+
+[node name="NavigationAgent3D" type="NavigationAgent3D" parent="Player" unique_id=1905394629]
+
+[node name="Camera3D2" type="Camera3D" parent="." unique_id=1306801703]
+transform = Transform3D(0.64278764, -0.43938506, 0.62750685, 0, 0.81915206, 0.57357645, -0.76604444, -0.36868784, 0.5265408, 8.037583, 8.333669, 10)
