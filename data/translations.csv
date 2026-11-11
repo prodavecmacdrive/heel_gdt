@@ -1,0 +1,51 @@
+keys,ru,en
+UI_BTN_MENU,Меню,Menu
+UI_BTN_NOTES,Записи,Notes
+UI_BTN_MAP,Карта,Map
+UI_SURVEILLANCE_TITLE,НАБЛЮДЕНИЕ,SURVEILLANCE
+UI_INVENTORY_TITLE,ИНВЕНТАРЬ,INVENTORY
+UI_CHEST_TITLE,ХРАНИЛИЩЕ,CHEST STORAGE
+UI_SECTOR_HEADER_FORMAT,"[ СЕКТОР: %s ]","[ SECTOR: %s ]"
+UI_CAM_LABEL_FORMAT," КАМ %02d"," CAM %02d"
+UI_MENU_TITLE,СИСТЕМНОЕ МЕНЮ,SYSTEM MENU
+UI_MENU_CONTINUE,Продолжить,Continue
+UI_MENU_SETTINGS,Настройки,Settings
+UI_MENU_EXIT,Выход,Exit
+UI_SETTINGS_TITLE,НАСТРОЙКИ ТЕРМИНАЛА,TERMINAL SETTINGS
+UI_SETTINGS_LANGUAGE,Язык интерфейса:,Interface Language:
+UI_SETTINGS_BACK,Назад,Back
+UI_STATUS_NOTES_STUB,"ЗАПИСИ: Логи терминала доступны в консоли","NOTES: Terminal logs are available in the console"
+UI_STATUS_MAP_STUB,"НАВИГАЦИЯ: Схема бункера в разработке","NAVIGATION: Bunker schematic under construction"
+UI_STATUS_ITEM_SELECTED,"Выбран предмет: %s","Selected item: %s"
+UI_STATUS_ITEM_DESELECTED,"Выбор отменен: %s","Deselected item: %s"
+UI_STATUS_SELECTION_CLEARED,Выбор предмета сброшен,Item selection cleared
+UI_STATUS_STORED_IN_CHEST,"Помещено в сундук: %s","Stored in chest: %s"
+UI_STATUS_TAKEN_FROM_CHEST,"Взято из сундука: %s","Taken from chest: %s"
+UI_STATUS_CHEST_FULL,"Сундук полон (макс. %d предмета)","Chest is full (max %d items)"
+UI_STATUS_INVENTORY_FULL,"Инвентарь полон (макс. %d предметов)","Inventory is full (max %d items)"
+UI_STATUS_ITEM_OBTAINED,"Получен предмет: %s","Obtained item: %s"
+UI_STATUS_CHEST_LOCKED,"Сундук заперт. Требуется: %s","Chest is locked. Required: %s"
+UI_STATUS_CHEST_UNLOCKED,"Сундук открыт с помощью: %s","Chest unlocked using: %s"
+UI_STATUS_DOOR_LOCKED,"Шлюз заблокирован. Требуется: %s","Airlock is locked. Required: %s"
+UI_STATUS_DOOR_OPENED,"Шлюз открыт. Переход в сектор...","Airlock opened. Transitioning to sector..."
+UI_DEFAULT_FAIL_TEXT,Это здесь не сработает.,That won't work here.
+Это здесь не сработает.,Это здесь не сработает.,That won't work here.
+Ключ,Ключ,Key
+Батарейка,Батарейка,Battery
+Записка,Записка,Note
+Отвертка,Отвертка,Screwdriver
+Карточка,Карточка,Access Card
+Предмет,Предмет,Item
+"Стандартный ключ доступа сектора 01. Открывает запертый контейнер и электронный терминал шлюза.","Стандартный ключ доступа сектора 01. Открывает запертый контейнер и электронный терминал шлюза.","Standard Sector 01 access key. Unlocks the locked storage container and airlock terminal."
+"Энергетический элемент питания для портативных приборов и резервных цепей.","Энергетический элемент питания для портативных приборов и резервных цепей.","Power cell for portable devices and backup circuits."
+"Рукописная служебная заметка персонала бункера с подсказками по кодам безопасности.","Рукописная служебная заметка персонала бункера с подсказками по кодам безопасности.","Handwritten staff memo containing security code hints."
+"Слесарный инструмент для демонтажа вентиляционных решёток и сервисных панелей.","Слесарный инструмент для демонтажа вентиляционных решёток и сервисных панелей.","Maintenance tool for removing vent grilles and service panels."
+"Магнитная ключ-карта допуска сотрудника технического сектора.","Магнитная ключ-карта допуска сотрудника технического сектора.","Magnetic access keycard assigned to technical sector personnel."
+ROOM 01,СЕКТОР 01,ROOM 01
+ROOM 02,СЕКТОР 02,ROOM 02
+ROOM TEST,ТЕСТОВЫЙ СЕКТОР,TEST SECTOR
+"Электронный замок шлюза. Требуется ключ доступа.","Электронный замок шлюза. Требуется ключ доступа.","Electronic airlock lock. Access key required."
+"Система шлюзу активована. Повторний доступ не потрібен.","Система шлюза активирована. Повторный доступ не требуется.","Airlock system activated. Further access is not required."
+"Доступ получен. Шлюз разблокирован!","Доступ получен. Шлюз разблокирован!","Access granted. Airlock unlocked!"
+"Этот предмет не подходит к замку.","Этот предмет не подходит к замку.","This item does not fit the lock."
+

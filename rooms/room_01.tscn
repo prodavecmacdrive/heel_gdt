@@ -6,9 +6,18 @@
 [ext_resource type="PackedScene" uid="uid://bx8q8njxbeiv3" path="res://entities/door/door.tscn" id="4_r1ded"]
 [ext_resource type="PackedScene" uid="uid://cv7knxyoa5n2n" path="res://entities/player/player.tscn" id="5_6peq8"]
 [ext_resource type="PackedScene" uid="uid://ch3w05tdf7lrj" path="res://entities/props/key.tscn" id="6_h3tsb"]
+[ext_resource type="Script" uid="uid://b2twhwh0g8kcb" path="res://core/quest_interactable.gd" id="7_11117"]
+[ext_resource type="Texture2D" uid="uid://pq6c6iir3gmv" path="res://assets/sprite/end_card-game_interact.png" id="8_dhk51"]
 
 [sub_resource type="NavigationMesh" id="NavigationMesh_d3ul5"]
-agent_height = 1.2
+vertices = PackedVector3Array(-15.5, 0.33441162, -3.5, -7.25, 0.33441162, -3.5, -7, 0.33441162, -4.25, -5.75, 0.33441162, -15.5, -15.5, 0.33441162, -15.5, -5.75, 0.33441162, -4.25, -4.75, 0.33441162, -4.25, -4.5, 0.33441162, -3.25, 0.75, 0.33441162, 0, 2.5, 0.33441162, 0, 15.5, 0.33441162, 1, 15.5, 0.33441162, -15.5, 2.75, 0.33441162, 1, -7, 0.33441162, -2.75, -15.5, 0.33441162, 6.25, -5.5, 0.33441162, 6.25, -5.5, 0.33441162, 6, -5.75, 0.33441162, -2.75, -1, 0.33441162, 5.5, -0.75, 0.33441162, 6, 0.75, 0.33441162, 2.25, 0.25, 0.33441162, 2, -5.25, 0.33441162, 5.5, 0.25, 0.33441162, 0.25, -4.75, 0.33441162, -2.75, 2.5, 0.33441162, 2.25, -1, 0.33441162, 7, -3, 0.33441162, 15.5, 15.5, 0.33441162, 15.5, -3, 0.33441162, 7, -5.25, 0.33441162, 7, -15.5, 0.33441162, 15.5)
+polygons = [PackedInt32Array(1, 0, 2), PackedInt32Array(2, 0, 4), PackedInt32Array(2, 4, 3), PackedInt32Array(3, 5, 2), PackedInt32Array(7, 6, 8), PackedInt32Array(8, 6, 9), PackedInt32Array(6, 3, 9), PackedInt32Array(9, 3, 10), PackedInt32Array(10, 3, 11), PackedInt32Array(6, 5, 3), PackedInt32Array(9, 10, 12), PackedInt32Array(1, 13, 0), PackedInt32Array(0, 13, 14), PackedInt32Array(14, 13, 16), PackedInt32Array(14, 16, 15), PackedInt32Array(13, 17, 16), PackedInt32Array(21, 20, 18), PackedInt32Array(18, 20, 19), PackedInt32Array(22, 16, 17), PackedInt32Array(21, 18, 23), PackedInt32Array(23, 18, 22), PackedInt32Array(23, 22, 24), PackedInt32Array(24, 22, 17), PackedInt32Array(24, 7, 23), PackedInt32Array(23, 7, 8), PackedInt32Array(19, 20, 25), PackedInt32Array(19, 25, 26), PackedInt32Array(26, 25, 27), PackedInt32Array(27, 25, 10), PackedInt32Array(27, 10, 28), PackedInt32Array(27, 29, 26), PackedInt32Array(25, 12, 10), PackedInt32Array(30, 29, 27), PackedInt32Array(30, 27, 15), PackedInt32Array(15, 27, 14), PackedInt32Array(14, 27, 31)]
+geometry_parsed_geometry_type = 1
+cell_size = 0.25
+cell_height = 0.25
+agent_height = 2.0
+agent_radius = 0.5
+agent_max_climb = 0.25
 agent_max_slope = 60.0
 
 [sub_resource type="HeightMapShape3D" id="HeightMapShape3D_d3ul5"]
@@ -21,6 +30,17 @@ size = Vector2(32, 32)
 subdivide_width = 32
 subdivide_depth = 32
 
+[sub_resource type="BoxShape3D" id="BoxShape3D_dhk51"]
+size = Vector3(6.58, 7.18, 0.3)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_r1ded"]
+size = Vector3(6.58, 7.18, 0.5)
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_d3ul5"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_d3ul5"]
+size = Vector3(0.4, 0.6, 0.2)
+
 [node name="Room" type="Node3D" unique_id=772767533]
 script = ExtResource("1_rkvq2")
 
@@ -28,11 +48,21 @@ script = ExtResource("1_rkvq2")
 transform = Transform3D(0.8660254, 0.35355338, -0.35355338, 0, 0.70710677, 0.70710677, 0.5, -0.6123724, 0.6123724, 0, 0, 0)
 shadow_enabled = true
 
+[node name="Camera3D2" type="Camera3D" parent="." unique_id=1306801703]
+transform = Transform3D(0.09973931, -0.5707164, 0.8150674, -1.9156564e-08, 0.81915206, 0.57357645, -0.9950136, -0.05720814, 0.08170165, 8.438126, 6.4024353, 7.7700806)
+top_level = true
+
 [node name="Camera3D" type="Camera3D" parent="." unique_id=1868199601]
-transform = Transform3D(1, 0, 0, 0, 0.76604444, 0.6427876, 0, -0.6427876, 0.76604444, 0, 14, 18)
+transform = Transform3D(0.6321127, -0.31821576, 0.7065213, 0, 0.91178566, 0.41066644, -0.7748765, -0.25958747, 0.5763513, 6.533325, 4.379425, 12.151855)
 
 [node name="NavigationRegion3D" type="NavigationRegion3D" parent="." unique_id=368923970]
 navigation_mesh = SubResource("NavigationMesh_d3ul5")
+
+[node name="Door" parent="NavigationRegion3D" unique_id=592288972 instance=ExtResource("4_r1ded")]
+transform = Transform3D(-1, 0, 8.742278e-08, 0, 1, 0, -8.742278e-08, 0, -1, -5.907053, 1.2000005, -3.52526)
+is_locked = true
+target_scene = "uid://cxqr0cwdiuu2p"
+target_door_id = "door_test"
 
 [node name="Terrain" type="StaticBody3D" parent="NavigationRegion3D" unique_id=310378124]
 script = ExtResource("2_11117")
@@ -44,20 +74,60 @@ shape = SubResource("HeightMapShape3D_d3ul5")
 mesh = SubResource("PlaneMesh_v321d")
 
 [node name="Chest" parent="NavigationRegion3D" unique_id=267795547 instance=ExtResource("3_dhk51")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 1.5, 1)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0.45117188, 1)
+
+[node name="QuestInteractable" type="Area3D" parent="NavigationRegion3D" unique_id=767756250]
+transform = Transform3D(0.5, 0, 0, 0, 0.5, 0, 0, 0, 0.5, -3.1246796, -1.4155884, 6.32312)
+rotation_edit_mode = 1
+script = ExtResource("7_11117")
+is_solid_obstacle = true
+visual_mode = 1
+sprite_texture = ExtResource("8_dhk51")
+metadata/_custom_type_script = "uid://b2twhwh0g8kcb"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/QuestInteractable" unique_id=1251073359]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.59, 0)
+shape = SubResource("BoxShape3D_dhk51")
+
+[node name="_VisualSprite3D" type="Sprite3D" parent="NavigationRegion3D/QuestInteractable" unique_id=230090366]
+cast_shadow = 2
+offset = Vector2(0, 359)
+billboard = 2
+shaded = true
+alpha_cut = 2
+texture_filter = 0
+texture = ExtResource("8_dhk51")
+
+[node name="_ObstacleStaticBody3D" type="StaticBody3D" parent="NavigationRegion3D/QuestInteractable" unique_id=461642753]
+collision_mask = 0
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="NavigationRegion3D/QuestInteractable/_ObstacleStaticBody3D" unique_id=1048958030]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 3.59, 0)
+shape = SubResource("BoxShape3D_r1ded")
 
 [node name="Player" parent="." unique_id=19820432 instance=ExtResource("5_6peq8")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 5, 0)
-
-[node name="Camera3D2" type="Camera3D" parent="." unique_id=1306801703]
-transform = Transform3D(0.64278764, -0.43938506, 0.62750685, 0, 0.81915206, 0.57357645, -0.76604444, -0.36868784, 0.5265408, 16, 12, 10)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.1434784, 0)
+slide_on_ceiling = false
 
 [node name="Key" parent="." unique_id=357714738 instance=ExtResource("6_h3tsb")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 1.5, 2)
-item_id = "room_01_key"
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3, 0.095336914, 2)
+object_id = "room_01_key"
 item_name = "Ключ"
 
-[node name="Door" parent="." unique_id=592288972 instance=ExtResource("4_r1ded")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.907053, 1.2000005, -3.52526)
-target_scene = "uid://cxqr0cwdiuu2p"
-target_door_id = "door_test"
+[node name="DoorTerminal" type="Area3D" parent="." unique_id=977895868]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -5.409348, 1.6034694, -3.2586882)
+script = ExtResource("7_11117")
+object_id = "terminal_door_01"
+inspect_text = "Электронный замок шлюза. Требуется ключ доступа."
+active_inspect_text = "Система шлюзу активована. Повторний доступ не потрібен."
+success_text = "Доступ получен. Шлюз разблокирован!"
+fail_text = "Этот предмет не подходит к замку."
+required_item = "Ключ"
+target_node = NodePath("../NavigationRegion3D/Door")
+metadata/_custom_type_script = "uid://b2twhwh0g8kcb"
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="DoorTerminal" unique_id=1683777121]
+shape = SubResource("BoxShape3D_d3ul5")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="DoorTerminal/CollisionShape3D" unique_id=33661801]
+mesh = SubResource("BoxMesh_d3ul5")

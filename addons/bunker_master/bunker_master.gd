@@ -1,6 +1,12 @@
 @tool
 class_name BunkerMaster
 extends Node3D
+## Мастер-сцена и 3D-визуализатор связей между шлюзами (`Door`) различных секторов бункера.
+##
+## Отображает в окне редактора цветные линии переходов между дверями комнат:
+## [br]• зелёный — связь валидна и перепад высот в пределах `elevation_tolerance`;
+## [br]• оранжевый — связь валидна, но двери находятся на разной высоте по оси Y;
+## [br]• красный крест — целевая сцена или `target_door_id` не найдены.
 
 class LineSegment:
 	var from: Vector3 = Vector3.ZERO
@@ -17,23 +23,33 @@ const COLOR_VALID: Color = Color(0.2, 0.9, 0.3)
 const COLOR_ELEVATION_MISMATCH: Color = Color(1.0, 0.55, 0.1)
 const COLOR_MISSING_TARGET: Color = Color(1.0, 0.15, 0.15)
 
+@export_category("Bunker Master")
+
+@export_group("Link Visualization")
+## Если включено, в 3D-вьюпорте редактора отображаются диагностические линии связей между всеми шлюзами дочерних комнат.
 @export var show_connections: bool = true:
 	set(value):
 		show_connections = value
 		if Engine.is_editor_hint():
 			rebuild_links()
 
+## Допустимое расхождение по высоте (ось Y, в метрах) между связанными дверями, при превышении которого связь помечается предупреждением.
 @export_range(0.05, 2.0, 0.05) var elevation_tolerance: float = 0.5:
 	set(value):
 		elevation_tolerance = value
 		if Engine.is_editor_hint():
 			rebuild_links()
 
+@export_group("Master Actions")
+## Кнопка редактора: проверяет все шлюзы дочерних комнат и выводит подробный отчёт о связях в консоль Output.
 @export_tool_button("Validate Bunker Links") var validate_btn: Callable = validate_bunker
+
+## Кнопка редактора: принудительно перестраивает 3D-линии визуализации связей между шлюзами.
 @export_tool_button("Rebuild Links") var rebuild_btn: Callable = rebuild_links
 
 var _last_self_transform: Transform3D = Transform3D.IDENTITY
 var _last_room_transforms: Dictionary = {}
+
 
 func _enter_tree() -> void:
 	if Engine.is_editor_hint():
@@ -42,24 +58,24 @@ func _enter_tree() -> void:
 		if not child_exiting_tree.is_connected(_on_child_exiting_tree):
 			child_exiting_tree.connect(_on_child_exiting_tree)
 
+
 func _ready() -> void:
 	if Engine.is_editor_hint():
 		_sync_transforms()
 		call_deferred("rebuild_links")
 
+
 func _on_child_entered_tree(node: Node) -> void:
-	if not Engine.is_editor_hint():
-		return
-	if node.name == VISUALIZER_NAME:
+	if not Engine.is_editor_hint() or node.name == VISUALIZER_NAME:
 		return
 	call_deferred("rebuild_links")
 
+
 func _on_child_exiting_tree(node: Node) -> void:
-	if not Engine.is_editor_hint():
-		return
-	if node.name == VISUALIZER_NAME:
+	if not Engine.is_editor_hint() or node.name == VISUALIZER_NAME:
 		return
 	call_deferred("rebuild_links")
+
 
 func _process(_delta: float) -> void:
 	if not Engine.is_editor_hint():
@@ -77,7 +93,7 @@ func _process(_delta: float) -> void:
 			if not _last_room_transforms.has(room):
 				changed = true
 				break
-			var prev_t: Transform3D = _last_room_transforms[room]
+			var prev_t: Transform3D = _last_room_transforms[room] as Transform3D
 			if not prev_t.is_equal_approx(room.global_transform):
 				changed = true
 				break
@@ -86,26 +102,21 @@ func _process(_delta: float) -> void:
 		_sync_transforms()
 		rebuild_links()
 
+
 func _sync_transforms() -> void:
 	_last_self_transform = global_transform
 	_last_room_transforms.clear()
 	for room: Node3D in _get_room_nodes():
 		_last_room_transforms[room] = room.global_transform
 
+
 func _get_or_create_visualizer() -> MeshInstance3D:
 	var visualizer: MeshInstance3D = get_node_or_null(VISUALIZER_NAME) as MeshInstance3D
-	if not visualizer:
+	if visualizer == null:
 		visualizer = MeshInstance3D.new()
 		visualizer.name = VISUALIZER_NAME
-		var imm_mesh := ImmediateMesh.new()
-		visualizer.mesh = imm_mesh
-
-		var mat := StandardMaterial3D.new()
-		mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-		mat.vertex_color_use_as_albedo = true
-		mat.no_depth_test = true
-		visualizer.material_override = mat
-
+		visualizer.mesh = ImmediateMesh.new()
+		visualizer.material_override = _create_visualizer_material()
 		add_child(visualizer)
 		visualizer.owner = null
 	else:
@@ -113,13 +124,18 @@ func _get_or_create_visualizer() -> MeshInstance3D:
 			visualizer.owner = null
 		if not (visualizer.mesh is ImmediateMesh):
 			visualizer.mesh = ImmediateMesh.new()
-		if not visualizer.material_override:
-			var mat := StandardMaterial3D.new()
-			mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-			mat.vertex_color_use_as_albedo = true
-			mat.no_depth_test = true
-			visualizer.material_override = mat
+		if visualizer.material_override == null:
+			visualizer.material_override = _create_visualizer_material()
 	return visualizer
+
+
+func _create_visualizer_material() -> StandardMaterial3D:
+	var mat := StandardMaterial3D.new()
+	mat.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	mat.vertex_color_use_as_albedo = true
+	mat.no_depth_test = true
+	return mat
+
 
 func _get_room_nodes() -> Array[Node3D]:
 	var rooms: Array[Node3D] = []
@@ -127,6 +143,7 @@ func _get_room_nodes() -> Array[Node3D]:
 		if child is Node3D and not child.scene_file_path.is_empty():
 			rooms.append(child as Node3D)
 	return rooms
+
 
 func _find_doors_in_node(parent: Node) -> Array[Node3D]:
 	var doors: Array[Node3D] = []
@@ -136,6 +153,7 @@ func _find_doors_in_node(parent: Node) -> Array[Node3D]:
 		doors.append_array(_find_doors_in_node(child))
 	return doors
 
+
 func _is_door_node(node: Node) -> bool:
 	if not (node is Node3D):
 		return false
@@ -144,9 +162,8 @@ func _is_door_node(node: Node) -> bool:
 		var script_path: String = (script_obj as Script).resource_path
 		if script_path.ends_with("door.gd"):
 			return true
-	if node.get("door_id") != null:
-		return true
-	return false
+	return node.get("door_id") != null
+
 
 func _normalize_scene_path(path_or_uid: String) -> String:
 	if path_or_uid.is_empty():
@@ -162,6 +179,7 @@ func _normalize_scene_path(path_or_uid: String) -> String:
 		if not resolved.is_empty():
 			return resolved
 	return path_or_uid
+
 
 func _match_room_scene(room_node: Node3D, target_scene_str: String) -> bool:
 	var room_path: String = room_node.scene_file_path
@@ -181,27 +199,16 @@ func _match_room_scene(room_node: Node3D, target_scene_str: String) -> bool:
 				return true
 	return false
 
+
 func _evaluate_door_link(door: Node3D, rooms: Array[Node3D]) -> Dictionary:
 	var target_scene_raw: String = String(door.get("target_scene"))
 	var target_door_id: String = String(door.get("target_door_id"))
 
 	if target_scene_raw.is_empty():
-		return {
-			"status_type": "ERROR",
-			"status_string": "[ERROR: Target not found] (Empty target_scene)",
-			"target_door": null,
-			"target_spawn_pos": Vector3.ZERO,
-			"y_diff": 0.0
-		}
+		return _make_link_result("ERROR", "[ERROR: Target not found] (Empty target_scene)", null, Vector3.ZERO, 0.0)
 
 	if target_door_id.is_empty():
-		return {
-			"status_type": "ERROR",
-			"status_string": "[ERROR: Target not found] (Empty target_door_id)",
-			"target_door": null,
-			"target_spawn_pos": Vector3.ZERO,
-			"y_diff": 0.0
-		}
+		return _make_link_result("ERROR", "[ERROR: Target not found] (Empty target_door_id)", null, Vector3.ZERO, 0.0)
 
 	var target_room: Node3D = null
 	for room: Node3D in rooms:
@@ -209,14 +216,8 @@ func _evaluate_door_link(door: Node3D, rooms: Array[Node3D]) -> Dictionary:
 			target_room = room
 			break
 
-	if not target_room:
-		return {
-			"status_type": "ERROR",
-			"status_string": "[ERROR: Target not found] (Target room not placed in BunkerMaster)",
-			"target_door": null,
-			"target_spawn_pos": Vector3.ZERO,
-			"y_diff": 0.0
-		}
+	if target_room == null:
+		return _make_link_result("ERROR", "[ERROR: Target not found] (Target room not placed in BunkerMaster)", null, Vector3.ZERO, 0.0)
 
 	var target_room_doors: Array[Node3D] = _find_doors_in_node(target_room)
 	var target_door: Node3D = null
@@ -225,14 +226,8 @@ func _evaluate_door_link(door: Node3D, rooms: Array[Node3D]) -> Dictionary:
 			target_door = t_door
 			break
 
-	if not target_door:
-		return {
-			"status_type": "ERROR",
-			"status_string": "[ERROR: Target not found] (Door '%s' not found in target room)" % target_door_id,
-			"target_door": null,
-			"target_spawn_pos": Vector3.ZERO,
-			"y_diff": 0.0
-		}
+	if target_door == null:
+		return _make_link_result("ERROR", "[ERROR: Target not found] (Door '%s' not found in target room)" % target_door_id, null, Vector3.ZERO, 0.0)
 
 	var spawn_pos: Vector3 = target_door.global_position
 	var spawn_node: Node = target_door.get_node_or_null("SpawnPoint")
@@ -241,29 +236,35 @@ func _evaluate_door_link(door: Node3D, rooms: Array[Node3D]) -> Dictionary:
 
 	var y_diff: float = absf(door.global_position.y - target_door.global_position.y)
 	if y_diff > elevation_tolerance:
-		return {
-			"status_type": "WARNING",
-			"status_string": "[WARNING: Y-Delta %.2fm]" % y_diff,
-			"target_door": target_door,
-			"target_spawn_pos": spawn_pos,
-			"y_diff": y_diff
-		}
+		return _make_link_result("WARNING", "[WARNING: Y-Delta %.2fm]" % y_diff, target_door, spawn_pos, y_diff)
 
+	return _make_link_result("OK", "[OK]", target_door, spawn_pos, y_diff)
+
+
+func _make_link_result(
+	status_type: String,
+	status_string: String,
+	target_door: Node3D,
+	target_spawn_pos: Vector3,
+	y_diff: float
+) -> Dictionary:
 	return {
-		"status_type": "OK",
-		"status_string": "[OK]",
+		"status_type": status_type,
+		"status_string": status_string,
 		"target_door": target_door,
-		"target_spawn_pos": spawn_pos,
-		"y_diff": y_diff
+		"target_spawn_pos": target_spawn_pos,
+		"y_diff": y_diff,
 	}
 
+
+## Перестраивает 3D-линии связей между всеми шлюзами дочерних сцен комнат.
 func rebuild_links() -> void:
 	if not Engine.is_editor_hint():
 		return
 
 	var visualizer: MeshInstance3D = _get_or_create_visualizer()
 	var imm_mesh: ImmediateMesh = visualizer.mesh as ImmediateMesh
-	if not imm_mesh:
+	if imm_mesh == null:
 		imm_mesh = ImmediateMesh.new()
 		visualizer.mesh = imm_mesh
 
@@ -284,12 +285,12 @@ func rebuild_links() -> void:
 			match status_type:
 				"OK":
 					var start_pos: Vector3 = door.global_position
-					var end_pos: Vector3 = link.get("target_spawn_pos", start_pos)
+					var end_pos: Vector3 = link.get("target_spawn_pos", start_pos) as Vector3
 					lines.append(LineSegment.new(start_pos, end_pos, COLOR_VALID))
 
 				"WARNING":
 					var start_pos: Vector3 = door.global_position
-					var end_pos: Vector3 = link.get("target_spawn_pos", start_pos)
+					var end_pos: Vector3 = link.get("target_spawn_pos", start_pos) as Vector3
 					lines.append(LineSegment.new(start_pos, end_pos, COLOR_ELEVATION_MISMATCH))
 					var vert_base: Vector3 = Vector3(end_pos.x, start_pos.y, end_pos.z)
 					lines.append(LineSegment.new(vert_base, end_pos, COLOR_ELEVATION_MISMATCH))
@@ -314,6 +315,8 @@ func rebuild_links() -> void:
 		imm_mesh.surface_add_vertex(visualizer.to_local(seg.to))
 	imm_mesh.surface_end()
 
+
+## Выводит в консоль диагностическую сводку по всем шлюзам и межкомнатным переходам.
 func validate_bunker() -> void:
 	var rooms: Array[Node3D] = _get_room_nodes()
 	print("==================================================")
@@ -358,4 +361,3 @@ func validate_bunker() -> void:
 
 	print("Summary: %d door(s) scanned, %d OK, %d Warning(s), %d Error(s)." % [total_doors, count_ok, count_warn, count_err])
 	print("==================================================")
-

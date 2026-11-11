@@ -26,7 +26,7 @@ window/stretch/aspect="expand"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/bunker_master/plugin.cfg", "res://addons/room_builder/plugin.cfg")
+enabled=PackedStringArray("res://addons/bunker_master/plugin.cfg", "res://addons/room_builder/plugin.cfg", "res://addons/quest_registry/plugin.cfg")
 
 [physics]
 

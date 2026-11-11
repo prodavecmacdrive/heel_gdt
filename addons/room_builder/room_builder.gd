@@ -1,39 +1,80 @@
 @tool
 class_name RoomBuilder
 extends Node3D
+## Инструмент редактора для процедурной генерации 3D-геометрии комнаты (пола, стен, потолка, навигации и шлюза).
+##
+## Поддерживает два режима построения:
+## [br]• по замкнутому криволинейному/многоугольному контуру `Path3D` (`contour_path`);
+## [br]• по прямоугольным габаритам (`room_width` × `room_depth`), если контур не используется.
 
 const ROOM_BASE_SCRIPT_PATH: String = "res://core/room_base.gd"
 const DOOR_SCENE: PackedScene = preload("res://entities/door/door.tscn")
 const PLAYER_SCENE: PackedScene = preload("res://entities/player/player.tscn")
 
+@export_category("Room Builder")
+
 @export_group("Contour Mode")
+## Путь к узлу `Path3D`, задающему 2D-контур пола и стен комнаты в плоскости XZ.
+## Если оставить пустым, генератор автоматически найдёт узел `"Contour"` в корне сцены.
 @export_node_path("Path3D") var contour_path: NodePath = NodePath("")
-@export var bake_interval: float = 1.0
+
+## Шаг дискретизации кривой `Curve3D` в метрах при запекании точек контура (меньше — плавнее изгибы, больше — меньше полигонов).
+@export_range(0.1, 10.0, 0.1) var bake_interval: float = 1.0
 
 @export_group("Room Dimensions")
+## Ширина комнаты по оси X в метрах (используется для прямоугольного режима, если контур `Path3D` содержит менее 3 точек).
 @export_range(4.0, 100.0, 0.5) var room_width: float = 16.0
+
+## Глубина комнаты по оси Z в метрах (используется для прямоугольного режима).
 @export_range(4.0, 100.0, 0.5) var room_depth: float = 16.0
+
+## Высота стен и уровень потолка комнаты по оси Y в метрах.
 @export_range(2.0, 20.0, 0.25) var wall_height: float = 4.0
+
+## Толщина генерируемых стен и их физических коллайдеров в метрах.
 @export_range(0.1, 2.0, 0.05) var wall_thickness: float = 0.4
+
+## Если включено, над комнатой создаётся односторонний потолок (прозрачный при взгляде камеры сверху снаружи).
 @export var generate_ceiling: bool = true
 
 @export_group("Surface Colors")
+## Базовый цвет (`albedo_color`) материала пола.
 @export var floor_color: Color = Color(0.4, 0.42, 0.45)
+
+## Базовый цвет (`albedo_color`) материала стен и потолка.
 @export var wall_color: Color = Color(0.32, 0.35, 0.38)
 
 @export_group("Doorway Setup")
+## Если включено, при генерации комнаты автоматически создаётся экземпляр шлюза `Door` (`res://entities/door/door.tscn`).
 @export var spawn_default_door: bool = true
+
+## Стена, у которой размещается шлюз в прямоугольном режиме построения:
+## [br]• `North (-Z)` (0) — северная стена;
+## [br]• `South (+Z)` (1) — южная стена;
+## [br]• `East (+X)` (2) — восточная стена;
+## [br]• `West (-X)` (3) — западная стена.
 @export_enum("North (-Z)", "South (+Z)", "East (+X)", "West (-X)") var door_wall: int = 0
+
+## Идентификатор `door_id`, назначаемый автоматически создаваемому шлюзу.
 @export var default_door_id: String = "door_main"
 
 @export_group("Testing & Setup")
+## Если включено, при отсутствии узла `Player` в сцене автоматически создаёт тестового игрока перед точкой спавна двери.
 @export var spawn_test_player: bool = true
 
 @export_group("Room Builder Actions")
+## Кнопка редактора: создаёт стандартный квадратный контур `Contour` (`Path3D` 10×10 м) в корне сцены.
 @export_tool_button("Create Default Contour") var create_contour_btn: Callable = create_default_contour
+
+## Кнопка редактора: перестраивает пол, стены, потолок, шлюз и запекает `NavigationRegion3D`.
 @export_tool_button("Generate Room Shell") var generate_btn: Callable = generate_room_shell
+
+## Кнопка редактора: удаляет сгенерированные узлы геометрии, навигации, двери и тестового игрока.
 @export_tool_button("Clear Geometry") var clear_btn: Callable = clear_geometry
+
+## Кнопка редактора: прикрепляет базовый скрипт контроллера комнаты (`res://core/room_base.gd`) к корневому узлу сцены.
 @export_tool_button("Apply room_base.gd to Root") var apply_base_btn: Callable = apply_room_base_to_root
+
 
 func _ready() -> void:
 	if Engine.is_editor_hint():
@@ -41,6 +82,8 @@ func _ready() -> void:
 		if contour_node == null:
 			create_default_contour()
 
+
+## Создаёт прямоугольный узел `Contour` (`Path3D`) в корне редактируемой сцены, если он ещё не существует.
 func create_default_contour() -> Path3D:
 	if not Engine.is_editor_hint():
 		return null
@@ -69,6 +112,8 @@ func create_default_contour() -> Path3D:
 	print("[RoomBuilder] Created default rectangular Contour Path3D under: ", scene_root.name)
 	return path
 
+
+## Полностью перестраивает оболочку комнаты (контейнеры, `NavigationRegion3D`, пол, стены, потолок, дверь и игрока).
 func generate_room_shell() -> void:
 	if not Engine.is_editor_hint():
 		return
@@ -80,11 +125,10 @@ func generate_room_shell() -> void:
 		push_warning("[RoomBuilder] Cannot generate room shell: edited_scene_root is null.")
 		return
 
-	if self != scene_root:
-		if scene_root.get_script() == null:
-			var base_script: Script = load(ROOM_BASE_SCRIPT_PATH) as Script
-			if base_script != null:
-				scene_root.set_script(base_script)
+	if self != scene_root and scene_root.get_script() == null:
+		var base_script: Script = load(ROOM_BASE_SCRIPT_PATH) as Script
+		if base_script != null:
+			scene_root.set_script(base_script)
 
 	_get_or_create_container(scene_root, "Lighting")
 	_get_or_create_container(scene_root, "Cameras")
@@ -96,12 +140,13 @@ func generate_room_shell() -> void:
 	nav_region.owner = scene_root
 
 	var nav_mesh := NavigationMesh.new()
-	nav_mesh.geometry_parsed_geometry_type = NavigationMesh.PARSED_GEOMETRY_BOTH
+	nav_mesh.geometry_parsed_geometry_type = NavigationMesh.PARSED_GEOMETRY_STATIC_COLLIDERS
 	nav_mesh.geometry_collision_mask = 1
 	nav_mesh.cell_size = 0.25
-	nav_mesh.cell_height = 0.2
+	nav_mesh.cell_height = 0.25
 	nav_mesh.agent_radius = 0.5
-	nav_mesh.agent_height = 1.8
+	nav_mesh.agent_height = 2.0
+	nav_mesh.agent_max_climb = 0.25
 	nav_mesh.agent_max_slope = 45.0
 	nav_region.navigation_mesh = nav_mesh
 
@@ -123,6 +168,8 @@ func generate_room_shell() -> void:
 
 	nav_region.bake_navigation_mesh(false)
 
+
+## Очищает ранее сгенерированную геометрию комнаты из корня сцены.
 func clear_geometry() -> void:
 	if not Engine.is_editor_hint():
 		return
@@ -131,18 +178,11 @@ func clear_geometry() -> void:
 	if scene_root == null:
 		return
 
-	var nav: Node = scene_root.get_node_or_null("NavigationRegion3D")
-	if nav != null:
-		scene_root.remove_child(nav)
-		nav.free()
+	for node_name: String in ["NavigationRegion3D", "Door", "Floor", "Ceiling", "Walls", "Player", "ExitIndicator"]:
+		_safe_free_child(scene_root, node_name)
 
-	_safe_free_child(scene_root, "Door")
-	_safe_free_child(scene_root, "Floor")
-	_safe_free_child(scene_root, "Ceiling")
-	_safe_free_child(scene_root, "Walls")
-	_safe_free_child(scene_root, "Player")
-	_safe_free_child(scene_root, "ExitIndicator")
 
+## Назначает скрипт `res://core/room_base.gd` корневому узлу текущей редактируемой сцены.
 func apply_room_base_to_root() -> void:
 	if not Engine.is_editor_hint():
 		return
@@ -159,25 +199,25 @@ func apply_room_base_to_root() -> void:
 	else:
 		push_error("[RoomBuilder] Failed to load 'res://core/room_base.gd'.")
 
+
 func _safe_free_child(parent: Node, child_name: String) -> void:
 	var child: Node = parent.get_node_or_null(child_name)
 	if child != null:
 		parent.remove_child(child)
 		child.free()
 
+
 func _lock_node(node: Node) -> void:
 	node.set_meta("_edit_lock_", true)
 	node.set_meta("_edit_group_", true)
 
+
 func _resolve_scene_root() -> Node:
 	if not Engine.is_editor_hint():
 		return null
-	var tree: SceneTree = get_tree()
-	if tree != null and tree.edited_scene_root != null:
-		return tree.edited_scene_root
-	if owner != null:
-		return owner
-	return self
+	var root: Node = SceneTreeUtils.resolve_scene_root(self)
+	return root if root != null else self
+
 
 func _resolve_contour_node() -> Path3D:
 	var scene_root: Node = _resolve_scene_root()
@@ -201,6 +241,7 @@ func _resolve_contour_node() -> Path3D:
 
 	return null
 
+
 func _get_or_create_container(scene_root: Node, container_name: String) -> Node3D:
 	var container: Node3D = scene_root.get_node_or_null(container_name) as Node3D
 	if container == null:
@@ -210,11 +251,11 @@ func _get_or_create_container(scene_root: Node, container_name: String) -> Node3
 		container.owner = scene_root
 	return container
 
+
 func _build_from_contour(scene_root: Node, nav_region: Node, path_node: Path3D) -> void:
 	var curve: Curve3D = path_node.curve
 	curve.bake_interval = bake_interval
 	var raw_points: PackedVector3Array = curve.get_baked_points()
-
 	if raw_points.size() < 3:
 		push_warning("[RoomBuilder] Path3D curve produced fewer than 3 baked points.")
 		return
@@ -243,7 +284,6 @@ func _build_from_contour(scene_root: Node, nav_region: Node, path_node: Path3D) 
 	if Geometry2D.is_polygon_clockwise(poly_2d):
 		poly_2d.reverse()
 
-	# --- Floor Construction ---
 	var floor_mesh: ArrayMesh = RoomMeshGenerator.build_contour_floor_mesh(poly_2d, floor_color)
 	if floor_mesh != null:
 		var floor_body := StaticBody3D.new()
@@ -271,26 +311,11 @@ func _build_from_contour(scene_root: Node, nav_region: Node, path_node: Path3D) 
 		floor_body.add_child(floor_mesh_inst)
 		floor_mesh_inst.owner = scene_root
 
-	# --- Ceiling Construction ---
 	if generate_ceiling:
 		var ceil_mesh: ArrayMesh = RoomMeshGenerator.build_contour_ceiling_mesh(poly_2d, wall_height, wall_color)
 		if ceil_mesh != null:
-			var ceil_body := StaticBody3D.new()
-			ceil_body.name = "Ceiling"
-			ceil_body.collision_layer = 0
-			ceil_body.collision_mask = 0
-			_lock_node(ceil_body)
-			scene_root.add_child(ceil_body)
-			ceil_body.owner = scene_root
+			_add_ceiling_node(scene_root, ceil_mesh)
 
-			var ceil_mesh_inst := MeshInstance3D.new()
-			ceil_mesh_inst.name = "MeshInstance3D"
-			_lock_node(ceil_mesh_inst)
-			ceil_mesh_inst.mesh = ceil_mesh
-			ceil_body.add_child(ceil_mesh_inst)
-			ceil_mesh_inst.owner = scene_root
-
-	# --- Walls Construction ---
 	var wall_segments: Array[Dictionary] = RoomMeshGenerator.calculate_wall_segments(poly_2d, wall_height)
 	var walls_body := StaticBody3D.new()
 	walls_body.name = "Walls"
@@ -298,17 +323,15 @@ func _build_from_contour(scene_root: Node, nav_region: Node, path_node: Path3D) 
 	nav_region.add_child(walls_body)
 	walls_body.owner = scene_root
 
-	var wall_mat := StandardMaterial3D.new()
-	wall_mat.albedo_color = wall_color
-	wall_mat.roughness = 0.85
-
+	var wall_mat: StandardMaterial3D = RoomMeshGenerator.create_surface_material(wall_color, 0.85)
 	for i: int in range(wall_segments.size()):
 		var seg: Dictionary = wall_segments[i]
-		var seg_xform: Transform3D = seg["transform"]
-		var seg_len: float = seg["length"]
+		var seg_xform: Transform3D = seg["transform"] as Transform3D
+		var seg_len: float = float(seg["length"])
+		var seg_size := Vector3(wall_thickness, wall_height, seg_len)
 
 		var wall_box_shape := BoxShape3D.new()
-		wall_box_shape.size = Vector3(wall_thickness, wall_height, seg_len)
+		wall_box_shape.size = seg_size
 
 		var wall_col := CollisionShape3D.new()
 		wall_col.name = "CollisionShape3D_%d" % i
@@ -319,7 +342,7 @@ func _build_from_contour(scene_root: Node, nav_region: Node, path_node: Path3D) 
 		wall_col.owner = scene_root
 
 		var wall_box_mesh := BoxMesh.new()
-		wall_box_mesh.size = Vector3(wall_thickness, wall_height, seg_len)
+		wall_box_mesh.size = seg_size
 		wall_box_mesh.material = wall_mat
 
 		var wall_mesh_inst := MeshInstance3D.new()
@@ -330,7 +353,6 @@ func _build_from_contour(scene_root: Node, nav_region: Node, path_node: Path3D) 
 		walls_body.add_child(wall_mesh_inst)
 		wall_mesh_inst.owner = scene_root
 
-	# --- Door Placement ---
 	var spawned_door: Node3D = null
 	if spawn_default_door and DOOR_SCENE != null and poly_2d.size() >= 2:
 		var door_xform: Transform3D = RoomMeshGenerator.calculate_contour_door_transform(poly_2d, wall_thickness)
@@ -347,6 +369,24 @@ func _build_from_contour(scene_root: Node, nav_region: Node, path_node: Path3D) 
 	if spawn_test_player:
 		_spawn_test_player_if_needed(scene_root, spawned_door)
 
+
+func _add_ceiling_node(scene_root: Node, ceil_mesh: ArrayMesh) -> void:
+	var ceil_body := StaticBody3D.new()
+	ceil_body.name = "Ceiling"
+	ceil_body.collision_layer = 0
+	ceil_body.collision_mask = 0
+	_lock_node(ceil_body)
+	scene_root.add_child(ceil_body)
+	ceil_body.owner = scene_root
+
+	var ceil_mesh_inst := MeshInstance3D.new()
+	ceil_mesh_inst.name = "MeshInstance3D"
+	_lock_node(ceil_mesh_inst)
+	ceil_mesh_inst.mesh = ceil_mesh
+	ceil_body.add_child(ceil_mesh_inst)
+	ceil_mesh_inst.owner = scene_root
+
+
 func _attach_door_indicator(door_instance: Node3D, scene_root: Node) -> void:
 	var indicator := MeshInstance3D.new()
 	indicator.name = "ExitIndicator"
@@ -362,12 +402,9 @@ func _attach_door_indicator(door_instance: Node3D, scene_root: Node) -> void:
 	door_instance.add_child(indicator)
 	indicator.owner = scene_root
 
+
 func _spawn_test_player_if_needed(scene_root: Node, door_instance: Node3D) -> void:
-	if not spawn_test_player:
-		return
-	if scene_root.get_node_or_null("Player") != null:
-		return
-	if PLAYER_SCENE == null:
+	if not spawn_test_player or scene_root.get_node_or_null("Player") != null or PLAYER_SCENE == null:
 		return
 
 	var player_node: Node3D = PLAYER_SCENE.instantiate() as Node3D
@@ -378,16 +415,14 @@ func _spawn_test_player_if_needed(scene_root: Node, door_instance: Node3D) -> vo
 	var spawn_pos := Vector3(0.0, 1.0, 0.0)
 	if door_instance != null:
 		var spawn_pt: Node = door_instance.get_node_or_null("SpawnPoint")
-		if spawn_pt is Marker3D:
-			spawn_pos = (spawn_pt as Marker3D).global_position
-			spawn_pos.y = 1.0
-		elif spawn_pt is Node3D:
+		if spawn_pt is Node3D:
 			spawn_pos = (spawn_pt as Node3D).global_position
 			spawn_pos.y = 1.0
 		else:
 			spawn_pos = Vector3(door_instance.global_position.x, 1.0, door_instance.global_position.z)
 
 	player_node.global_position = spawn_pos
+
 
 func _build_floor(scene_root: Node, parent: Node) -> StaticBody3D:
 	var floor_body := StaticBody3D.new()
@@ -417,27 +452,18 @@ func _build_floor(scene_root: Node, parent: Node) -> StaticBody3D:
 
 	return floor_body
 
+
 func _build_walls(scene_root: Node, parent: Node) -> void:
 	var half_w: float = room_width * 0.5
 	var half_d: float = room_depth * 0.5
 	var half_h: float = wall_height * 0.5
 	var half_t: float = wall_thickness * 0.5
 
-	var north_pos := Vector3(0.0, half_h, -half_d - half_t)
-	var north_size := Vector3(room_width + (wall_thickness * 2.0), wall_height, wall_thickness)
-	_create_wall(scene_root, parent, "WallNorth", north_pos, north_size)
+	_create_wall(scene_root, parent, "WallNorth", Vector3(0.0, half_h, -half_d - half_t), Vector3(room_width + wall_thickness * 2.0, wall_height, wall_thickness))
+	_create_wall(scene_root, parent, "WallSouth", Vector3(0.0, half_h, half_d + half_t), Vector3(room_width + wall_thickness * 2.0, wall_height, wall_thickness))
+	_create_wall(scene_root, parent, "WallEast", Vector3(half_w + half_t, half_h, 0.0), Vector3(wall_thickness, wall_height, room_depth))
+	_create_wall(scene_root, parent, "WallWest", Vector3(-half_w - half_t, half_h, 0.0), Vector3(wall_thickness, wall_height, room_depth))
 
-	var south_pos := Vector3(0.0, half_h, half_d + half_t)
-	var south_size := Vector3(room_width + (wall_thickness * 2.0), wall_height, wall_thickness)
-	_create_wall(scene_root, parent, "WallSouth", south_pos, south_size)
-
-	var east_pos := Vector3(half_w + half_t, half_h, 0.0)
-	var east_size := Vector3(wall_thickness, wall_height, room_depth)
-	_create_wall(scene_root, parent, "WallEast", east_pos, east_size)
-
-	var west_pos := Vector3(-half_w - half_t, half_h, 0.0)
-	var west_size := Vector3(wall_thickness, wall_height, room_depth)
-	_create_wall(scene_root, parent, "WallWest", west_pos, west_size)
 
 func _create_wall(scene_root: Node, parent: Node, wall_name: String, wall_pos: Vector3, wall_size: Vector3) -> StaticBody3D:
 	var wall_body := StaticBody3D.new()
@@ -461,35 +487,21 @@ func _create_wall(scene_root: Node, parent: Node, wall_name: String, wall_pos: V
 	_lock_node(mesh_inst)
 	var box_mesh := BoxMesh.new()
 	box_mesh.size = wall_size
-	var mat := StandardMaterial3D.new()
-	mat.albedo_color = wall_color
-	mat.roughness = 0.85
-	box_mesh.material = mat
+	box_mesh.material = RoomMeshGenerator.create_surface_material(wall_color, 0.85)
 	mesh_inst.mesh = box_mesh
 	wall_body.add_child(mesh_inst)
 	mesh_inst.owner = scene_root
 
 	return wall_body
 
+
 func _build_box_ceiling(scene_root: Node) -> void:
 	if not generate_ceiling:
 		return
-
 	var ceil_mesh: ArrayMesh = RoomMeshGenerator.build_box_ceiling_mesh(room_width, room_depth, wall_height, wall_color)
-	var ceil_body := StaticBody3D.new()
-	ceil_body.name = "Ceiling"
-	ceil_body.collision_layer = 0
-	ceil_body.collision_mask = 0
-	_lock_node(ceil_body)
-	scene_root.add_child(ceil_body)
-	ceil_body.owner = scene_root
+	if ceil_mesh != null:
+		_add_ceiling_node(scene_root, ceil_mesh)
 
-	var ceil_mesh_inst := MeshInstance3D.new()
-	ceil_mesh_inst.name = "MeshInstance3D"
-	_lock_node(ceil_mesh_inst)
-	ceil_mesh_inst.mesh = ceil_mesh
-	ceil_body.add_child(ceil_mesh_inst)
-	ceil_mesh_inst.owner = scene_root
 
 func _build_door(scene_root: Node) -> Node3D:
 	if DOOR_SCENE == null:
@@ -505,16 +517,16 @@ func _build_door(scene_root: Node) -> Node3D:
 	var offset: float = wall_thickness * 0.5 + 0.3
 
 	match door_wall:
-		0: # North (-Z)
+		0:
 			door_instance.position = Vector3(0.0, 1.2, -half_d + offset)
 			door_instance.rotation_degrees = Vector3(0.0, 0.0, 0.0)
-		1: # South (+Z)
+		1:
 			door_instance.position = Vector3(0.0, 1.2, half_d - offset)
 			door_instance.rotation_degrees = Vector3(0.0, 180.0, 0.0)
-		2: # East (+X)
+		2:
 			door_instance.position = Vector3(half_w - offset, 1.2, 0.0)
 			door_instance.rotation_degrees = Vector3(0.0, -90.0, 0.0)
-		3: # West (-X)
+		3:
 			door_instance.position = Vector3(-half_w + offset, 1.2, 0.0)
 			door_instance.rotation_degrees = Vector3(0.0, 90.0, 0.0)
 

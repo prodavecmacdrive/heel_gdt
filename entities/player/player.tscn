@@ -7,11 +7,32 @@
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_d3ul5"]
 
 [node name="Player" type="CharacterBody3D" unique_id=19820432]
-up_direction = Vector3(0, -1, 0)
 script = ExtResource("1_4flbx")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1433897620]
+visible = false
 mesh = SubResource("CapsuleMesh_d3ul5")
+
+[node name="Sprite3D" type="Sprite3D" parent="." unique_id=1845209341]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+pixel_size = 0.03
+offset = Vector2(0, 32)
+billboard = 2
+shaded = true
+double_sided = true
+alpha_cut = 2
+texture_filter = 0
+
+[node name="AnimatedSprite3D" type="AnimatedSprite3D" parent="." unique_id=1845209342]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1, 0)
+visible = false
+pixel_size = 0.03
+offset = Vector2(0, 32)
+billboard = 2
+shaded = true
+double_sided = true
+alpha_cut = 2
+texture_filter = 0
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=756388490]
 shape = SubResource("CapsuleShape3D_d3ul5")

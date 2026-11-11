@@ -1,0 +1,92 @@
+[gd_resource type="Resource" script_class="QuestRegistryData" load_steps=14 format=3]
+
+[ext_resource type="Script" path="res://core/registry/quest_registry_data.gd" id="1_qreg"]
+[ext_resource type="Script" path="res://core/item_data.gd" id="2_item"]
+[ext_resource type="Script" path="res://core/registry/world_flag_data.gd" id="3_flag"]
+
+[sub_resource type="Resource" id="Resource_item_key"]
+script = ExtResource("2_item")
+item_id = "Ключ"
+item_name = "Ключ"
+category = "Key"
+color = Color(1, 0.85, 0.2, 1)
+description = "Стандартный ключ доступа сектора 01. Открывает запертый контейнер и электронный терминал шлюза."
+metadata = {}
+
+[sub_resource type="Resource" id="Resource_item_battery"]
+script = ExtResource("2_item")
+item_id = "Батарейка"
+item_name = "Батарейка"
+category = "Tool"
+color = Color(0.3, 0.85, 0.5, 1)
+description = "Энергетический элемент питания для портативных приборов и резервных цепей."
+metadata = {}
+
+[sub_resource type="Resource" id="Resource_item_note"]
+script = ExtResource("2_item")
+item_id = "Записка"
+item_name = "Записка"
+category = "Document"
+color = Color(0.9, 0.9, 0.8, 1)
+description = "Рукописная служебная заметка персонала бункера с подсказками по кодам безопасности."
+metadata = {}
+
+[sub_resource type="Resource" id="Resource_item_screwdriver"]
+script = ExtResource("2_item")
+item_id = "Отвертка"
+item_name = "Отвертка"
+category = "Tool"
+color = Color(0.4, 0.7, 1, 1)
+description = "Слесарный инструмент для демонтажа вентиляционных решёток и сервисных панелей."
+metadata = {}
+
+[sub_resource type="Resource" id="Resource_item_card"]
+script = ExtResource("2_item")
+item_id = "Карточка"
+item_name = "Карточка"
+category = "Key"
+color = Color(0.95, 0.4, 0.35, 1)
+description = "Магнитная ключ-карта допуска сотрудника технического сектора."
+metadata = {}
+
+[sub_resource type="Resource" id="Resource_flag_room01_key"]
+script = ExtResource("3_flag")
+flag_id = "room_01_key"
+default_value = false
+category = "Item State"
+description = "Флаг подбора предмета 'Ключ' с пола в комнате room_01."
+
+[sub_resource type="Resource" id="Resource_flag_terminal_door01"]
+script = ExtResource("3_flag")
+flag_id = "terminal_door_01"
+default_value = false
+category = "Puzzle"
+description = "Флаг успешной разблокировки терминала шлюза в комнате room_01."
+
+[sub_resource type="Resource" id="Resource_flag_chest01"]
+script = ExtResource("3_flag")
+flag_id = "room_01_chest_unlocked"
+default_value = false
+category = "Puzzle"
+description = "Флаг отпирания контейнера хранения в комнате room_01."
+
+[sub_resource type="Resource" id="Resource_flag_chest02"]
+script = ExtResource("3_flag")
+flag_id = "room_02_chest_unlocked"
+default_value = false
+category = "Puzzle"
+description = "Флаг отпирания контейнера хранения в комнате room_02."
+
+[sub_resource type="Resource" id="Resource_flag_door01"]
+script = ExtResource("3_flag")
+flag_id = "door_01_unlocked"
+default_value = false
+category = "Door"
+description = "Флаг снятия блокировки с шлюза door_01."
+
+[resource]
+script = ExtResource("1_qreg")
+items = Array[ExtResource("2_item")]([SubResource("Resource_item_key"), SubResource("Resource_item_battery"), SubResource("Resource_item_note"), SubResource("Resource_item_screwdriver"), SubResource("Resource_item_card")])
+flags = Array[ExtResource("3_flag")]([SubResource("Resource_flag_room01_key"), SubResource("Resource_flag_terminal_door01"), SubResource("Resource_flag_chest01"), SubResource("Resource_flag_chest02"), SubResource("Resource_flag_door01")])
+registered_object_ids = PackedStringArray("room_01_key", "room_01_chest", "terminal_door_01", "room_02_chest")
+
